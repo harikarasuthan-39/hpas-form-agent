@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HPAS — Deploy Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#07080f;--s1:#0d0f1c;--s2:#131626;--border:#232840;
+    --gold:#e8a020;--teal:#00bfa5;--red:#f05050;
+    --txt:#dde1f0;--txt2:#8892b0;--txt3:#4a5270;
+  }
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:40px 20px;}
+  .wrap{max-width:780px;margin:0 auto;}
+
+  /* Header */
+  .header{text-align:center;padding:48px 0 40px;}
+  .logo{display:inline-flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .gem{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#e8a020,#ffc233);
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#07080f;
+    box-shadow:0 0 28px rgba(232,160,32,.35);}
+  .brand{text-align:left;}
+  .brand-name{font-weight:800;font-size:24px;color:#fff;}
+  .brand-sub{font-size:12px;color:var(--txt3);margin-top:2px;letter-spacing:.05em;}
+  h1{font-size:32px;font-weight:800;color:#fff;margin-bottom:12px;letter-spacing:-.02em;}
+  .subtitle{font-size:16px;color:var(--txt2);line-height:1.6;}
+
+  /* Progress bar */
+  .progress{display:flex;gap:0;margin:40px 0 48px;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+  .prog-step{flex:1;padding:16px 12px;text-align:center;background:var(--s1);border-right:1px solid var(--border);
+    transition:background .3s;}
+  .prog-step:last-child{border-right:none;}
+  .prog-n{font-weight:800;font-size:20px;color:var(--txt3);}
+  .prog-l{font-size:11px;color:var(--txt3);margin-top:3px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+
+  /* Step cards */
+  .step-card{
+    background:var(--s1);border:1px solid var(--border);border-radius:16px;
+    padding:32px;margin-bottom:20px;position:relative;overflow:hidden;
+  }
+  .step-card::before{
+    content:'';position:absolute;top:0;left:0;width:4px;height:100%;
+    background:linear-gradient(180deg,var(--gold),var(--gold2,#ffc233));
+  }
+  .step-card.teal::before{background:linear-gradient(180deg,var(--teal),#00e5cc);}
+  .step-card.red::before{background:linear-gradient(180deg,var(--red),#ff7070);}
+
+  .step-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(232,160,32,.1);border:2px solid rgba(232,160,32,.3);
+    font-weight:800;font-size:14px;color:var(--gold);margin-bottom:14px;
+  }
+  .step-card.teal .step-num{background:rgba(0,191,165,.1);border-color:rgba(0,191,165,.3);color:var(--teal);}
+
+  h2{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .step-desc{font-size:14px;color:var(--txt2);margin-bottom:20px;line-height:1.6;}
+
+  /* Code blocks */
+  .code-block{
+    background:#060810;border:1px solid var(--border);border-radius:10px;
+    padding:18px 20px;margin:12px 0;font-family:'JetBrains Mono',monospace;
+    font-size:13px;line-height:1.7;overflow-x:auto;position:relative;
+  }
+  .code-label{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--txt3);margin-bottom:10px;
+  }
+  .cmd{color:#e8a020;}
+  .cmt{color:#4a5270;font-style:italic;}
+  .str{color:#00bfa5;}
+  .kw{color:#c792ea;}
+  .copy-btn{
+    position:absolute;top:12px;right:12px;
+    background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.2);
+    color:var(--gold);font-size:11px;font-weight:600;padding:4px 10px;
+    border-radius:5px;cursor:pointer;font-family:'Outfit',sans-serif;
+    transition:all .2s;
+  }
+  .copy-btn:hover{background:rgba(232,160,32,.2);}
+
+  /* Info boxes */
+  .info{
+    padding:14px 16px;border-radius:8px;margin:14px 0;
+    display:flex;gap:10px;font-size:13px;line-height:1.5;
+  }
+  .info-gold{background:rgba(232,160,32,.07);border:1px solid rgba(232,160,32,.2);color:var(--gold);}
+  .info-teal{background:rgba(0,191,165,.07);border:1px solid rgba(0,191,165,.2);color:var(--teal);}
+  .info-red{background:rgba(240,80,80,.07);border:1px solid rgba(240,80,80,.2);color:var(--red);}
+  .info-ico{font-size:16px;flex-shrink:0;}
+  .info a{color:inherit;font-weight:700;}
+
+  /* Link button */
+  .link-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 24px;border-radius:8px;font-weight:700;font-size:14px;
+    text-decoration:none;transition:all .2s;margin-top:8px;
+  }
+  .link-gold{background:linear-gradient(135deg,var(--gold),#ffc233);color:#07080f;
+    box-shadow:0 4px 16px rgba(232,160,32,.3);}
+  .link-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,160,32,.4);}
+  .link-ghost{background:var(--s2);border:1px solid var(--border);color:var(--txt2);}
+  .link-ghost:hover{border-color:var(--txt2);color:#fff;}
+
+  /* Final box */
+  .final{
+    background:linear-gradient(135deg,rgba(0,191,165,.06),rgba(232,160,32,.04));
+    border:1px solid rgba(0,191,165,.2);border-radius:16px;
+    padding:36px;text-align:center;margin-top:32px;
+  }
+  .final-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;}
+  .final-sub{font-size:14px;color:var(--txt2);margin-bottom:24px;line-height:1.6;}
+  .final-url{
+    display:inline-block;padding:12px 24px;
+    background:rgba(0,191,165,.1);border:1px solid rgba(0,191,165,.25);border-radius:8px;
+    font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--teal);
+    margin-bottom:8px;
+  }
+
+  /* Folder tree */
+  .tree{
+    background:#060810;border:1px solid var(--border);border-radius:10px;
+    padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:2;
+  }
+  .tree-dir{color:var(--gold);}
+  .tree-file{color:var(--teal);}
+  .tree-note{color:var(--txt3);font-size:11px;}
+
+  footer{text-align:center;padding:40px 0 20px;font-size:12px;color:var(--txt3);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="gem">H</div>
+      <div class="brand">
+        <div class="brand-name">HPAS</div>
+        <div class="brand-sub">Privacy-First Intelligent Form Agent</div>
+      </div>
+    </div>
+    <h1>Deploy to the Internet</h1>
+    <p class="subtitle">Follow these 4 steps to get your HPAS app live on a public URL<br/>using <strong style="color:#fff">GitHub</strong> + <strong style="color:#fff">Vercel</strong> — both free, no credit card needed.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress">
+    <div class="prog-step"><div class="prog-n">1</div><div class="prog-l">Setup Files</div></div>
+    <div class="prog-step"><div class="prog-n">2</div><div class="prog-l">Push to GitHub</div></div>
+    <div class="prog-step"><div class="prog-n">3</div><div class="prog-l">Deploy Vercel</div></div>
+    <div class="prog-step"><div class="prog-n">4</div><div class="prog-l">Live Link 🎉</div></div>
+  </div>
+
+  <!-- STEP 1: Setup -->
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <h2>Setup Your Project Folder</h2>
+    <p class="step-desc">You received a ready-to-deploy ZIP from Claude. Extract it and open a terminal inside the <code style="color:var(--gold)">hpas-deploy</code> folder. Run these commands:</p>
+
+    <div class="code-label">📁 Your folder should look like this:</div>
+    <div class="tree">
+      <span class="tree-dir">hpas-deploy/</span><br/>
+      &nbsp;&nbsp;├── <span class="tree-file">src/</span><br/>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="tree-file">App.jsx</span> &nbsp;<span class="tree-note">← your HPAS app</span><br/>
+      &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="tree-file">main.jsx</span><br/>
+      &nbsp;&nbsp;├── <span class="tree-file">index.html</span><br/>
+      &nbsp;&nbsp;├── <span class="tree-file">package.json</span><br/>
+      &nbsp;&nbsp;├── <span class="tree-file">vite.config.js</span><br/>
+      &nbsp;&nbsp;├── <span class="tree-file">vercel.json</span><br/>
+      &nbsp;&nbsp;└── <span class="tree-file">.gitignore</span>
+    </div>
+
+    <div style="margin-top:16px;" class="code-label">Terminal — install dependencies:</div>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <span class="cmt"># Open terminal in the hpas-deploy folder, then run:</span><br/>
+      <span class="cmd">npm install</span><br/><br/>
+      <span class="cmt"># Test it runs locally first:</span><br/>
+      <span class="cmd">npm run dev</span><br/><br/>
+      <span class="cmt"># Visit http://localhost:5173 — you should see HPAS!</span>
+    </div>
+
+    <div class="info info-gold">
+      <span class="info-ico">💡</span>
+      <span>If you don't have Node.js installed, download it first from <a href="https://nodejs.org" target="_blank">nodejs.org</a> — get the LTS version.</span>
+    </div>
+  </div>
+
+  <!-- STEP 2: GitHub -->
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <h2>Push to GitHub</h2>
+    <p class="step-desc">Create a new GitHub repository and push your code. You already have a GitHub account — just follow these steps:</p>
+
+    <div class="code-label">2a — Create a new repo on GitHub.com:</div>
+    <div class="info info-teal">
+      <span class="info-ico">🌐</span>
+      <span>Go to <a href="https://github.com/new" target="_blank"><strong>github.com/new</strong></a> → Name it <code>hpas-form-agent</code> → Set to <strong>Public</strong> → Click "Create repository" → <strong>DO NOT</strong> add README or .gitignore</span>
+    </div>
+
+    <div class="code-label">2b — Run these commands in your terminal:</div>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <span class="cmt"># Initialize git in your project folder</span><br/>
+      <span class="cmd">git init</span><br/>
+      <span class="cmd">git add .</span><br/>
+      <span class="cmd">git commit -m <span class="str">"initial: HPAS form agent"</span></span><br/><br/>
+      <span class="cmt"># Connect to your GitHub repo (replace YOUR_USERNAME)</span><br/>
+      <span class="cmd">git remote add origin https://github.com/<span class="str">YOUR_USERNAME</span>/hpas-form-agent.git</span><br/>
+      <span class="cmd">git branch -M main</span><br/>
+      <span class="cmd">git push -u origin main</span>
+    </div>
+
+    <div class="info info-gold">
+      <span class="info-ico">🔑</span>
+      <span>When it asks for a password, use a <strong>GitHub Personal Access Token</strong> (not your password). Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → "Generate new token (classic)" → check <strong>repo</strong> scope.</span>
+    </div>
+  </div>
+
+  <!-- STEP 3: Vercel -->
+  <div class="step-card teal">
+    <div class="step-num" style="background:rgba(0,191,165,.1);border-color:rgba(0,191,165,.3);color:var(--teal);">3</div>
+    <h2>Deploy on Vercel (Free)</h2>
+    <p class="step-desc">Vercel gives you a free public URL and auto-deploys every time you push to GitHub. No credit card required.</p>
+
+    <div class="info info-teal">
+      <span class="info-ico">1️⃣</span>
+      <span>Go to <a href="https://vercel.com/new" target="_blank"><strong>vercel.com/new</strong></a> and sign up/login with your GitHub account.</span>
+    </div>
+    <div class="info info-teal">
+      <span class="info-ico">2️⃣</span>
+      <span>Click <strong>"Import Project"</strong> → find <strong>hpas-form-agent</strong> → click <strong>Import</strong>.</span>
+    </div>
+    <div class="info info-teal">
+      <span class="info-ico">3️⃣</span>
+      <span>Vercel auto-detects Vite. Leave all settings as default. Just click <strong>"Deploy"</strong>.</span>
+    </div>
+    <div class="info info-teal">
+      <span class="info-ico">4️⃣</span>
+      <span>Wait ~60 seconds. Vercel builds and deploys automatically. Done! 🎉</span>
+    </div>
+
+    <div class="info info-gold" style="margin-top:16px;">
+      <span class="info-ico">⚠️</span>
+      <span><strong>Important:</strong> Your Anthropic API key should NOT be hardcoded in the file for a public site. In Vercel dashboard → your project → <strong>Settings → Environment Variables</strong> → add <code>VITE_ANTHROPIC_KEY = sk-ant-...</code>. Then in <code>App.jsx</code> line 1, change to:<br/><code style="color:var(--gold)">const API_KEY = import.meta.env.VITE_ANTHROPIC_KEY || "";</code></span>
+    </div>
+  </div>
+
+  <!-- STEP 4: Live -->
+  <div class="step-card teal">
+    <div class="step-num" style="background:rgba(0,191,165,.1);border-color:rgba(0,191,165,.3);color:var(--teal);">4</div>
+    <h2>Your Live Link!</h2>
+    <p class="step-desc">After deployment, Vercel gives you a permanent public URL like:</p>
+
+    <div class="final-url">https://hpas-form-agent.vercel.app</div>
+
+    <p style="font-size:13px;color:var(--txt3);margin-top:12px;line-height:1.6;">
+      Share this link with anyone. It works on all devices — desktop, tablet, mobile.<br/>
+      Every time you push code to GitHub, Vercel automatically re-deploys in under 60 seconds.
+    </p>
+
+    <div style="margin-top:20px;">
+      <div class="code-label">To update your site after making changes:</div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <span class="cmt"># Make your changes to App.jsx, then:</span><br/>
+        <span class="cmd">git add .</span><br/>
+        <span class="cmd">git commit -m <span class="str">"update: describe your change"</span></span><br/>
+        <span class="cmd">git push</span><br/><br/>
+        <span class="cmt"># Vercel auto-deploys in ~60 seconds. That's it!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Domain (bonus) -->
+  <div class="step-card" style="border-color:rgba(240,80,80,.2);">
+    <div class="step-num" style="background:rgba(240,80,80,.1);border-color:rgba(240,80,80,.3);color:var(--red);">★</div>
+    <h2>Bonus: Custom Domain (Optional)</h2>
+    <p class="step-desc">Want a domain like <strong>hpas.in</strong> or <strong>hpas.tech</strong>? Buy one cheaply and connect it to Vercel in minutes.</p>
+    <div class="info info-red">
+      <span class="info-ico">🌐</span>
+      <span>Buy a domain from <a href="https://namecheap.com" target="_blank" style="color:var(--red)">Namecheap</a> or <a href="https://domains.google" target="_blank" style="color:var(--red)">Google Domains</a> (~₹800–1500/year). Then in Vercel → your project → <strong>Settings → Domains</strong> → add your domain and follow the DNS instructions. Takes 5 minutes.</span>
+    </div>
+  </div>
+
+  <!-- Final -->
+  <div class="final">
+    <div class="final-title">🚀 You're Live!</div>
+    <div class="final-sub">
+      Your HPAS app will be accessible to anyone in the world via a single link.<br/>
+      No server to manage. No cost. Auto-deploys on every push.
+    </div>
+    <a class="link-btn link-gold" href="https://vercel.com/new" target="_blank">→ Go to Vercel Now</a>
+    <br/><br/>
+    <div style="font-size:12px;color:var(--txt3);">
+      Need help? The full steps are in this guide. Good luck at the hackathon! 🏆
+    </div>
+  </div>
+
+  <footer>HPAS — The AI Alchemists · INTELLINA 2026 · Dhaanish Ahmed Institute of Technology</footer>
+</div>
+
+<script>
+function copyCode(btn) {
+  const block = btn.parentElement;
+  const text = block.innerText.replace('Copy','').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent = 'Copied!';
+    setTimeout(()=>btn.textContent='Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
